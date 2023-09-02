@@ -11,6 +11,7 @@ import edu.eci.arsw.threads.ThreadCheck;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +20,7 @@ import java.util.logging.Logger;
  * @author hcadavid
  */
 public class HostBlackListsValidator {
+    private Object lock = new Object();
 
     private static final int BLACK_LIST_ALARM_COUNT=5;
     
@@ -36,7 +38,7 @@ public class HostBlackListsValidator {
         
         LinkedList<Integer> blackListOcurrences=new LinkedList<>();
         
-        int ocurrencesCount=0;
+        AtomicInteger ocurrencesCount = new AtomicInteger(0);
         
         HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
         
@@ -58,28 +60,22 @@ public class HostBlackListsValidator {
                 b = size*(i+1);
             }
 
-            threads.add(new ThreadCheck(HostBlacklistsDataSourceFacade.getInstance(), a, b, ipaddress));
+            threads.add(new ThreadCheck(HostBlacklistsDataSourceFacade.getInstance(), a, b, ipaddress,this.lock));
         }
 
         for(ThreadCheck thread:threads){
             thread.start();
         }
 
-        try{
-            for(ThreadCheck thread:threads){
-                thread.join();
-            }
-        } catch(InterruptedException e) {
-            e.printStackTrace();
-        }
 
         for(ThreadCheck thread:threads){
             blackListOcurrences.addAll(thread.getIndexes());
-            ocurrencesCount += thread.getOccurrences();
+            ocurrencesCount.addAndGet(thread.getOccurrences());
             checkedListsCount += thread.getServersChecked();
         }
         
-        if (ocurrencesCount>=BLACK_LIST_ALARM_COUNT){
+        if (ocurrencesCount.get()>=BLACK_LIST_ALARM_COUNT){
+            endThreads(threads);
             skds.reportAsNotTrustworthy(ipaddress);
         }
         else{
@@ -90,7 +86,12 @@ public class HostBlackListsValidator {
         
         return blackListOcurrences;
     }
-    
+
+    public void endThreads(ArrayList<ThreadCheck> threads){
+        for (ThreadCheck thread: threads){
+            thread.endThread();
+        }
+    }
     
     private static final Logger LOG = Logger.getLogger(HostBlackListsValidator.class.getName());
     
