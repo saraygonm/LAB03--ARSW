@@ -21,6 +21,7 @@ import java.util.logging.Logger;
  */
 public class HostBlackListsValidator {
     private Object lock = new Object();
+    private boolean running = true;
 
     private static final int BLACK_LIST_ALARM_COUNT=5;
     
@@ -66,31 +67,49 @@ public class HostBlackListsValidator {
         for(ThreadCheck thread:threads){
             thread.start();
         }
+        while (running) {
+            this.pauseThreads(threads);
+            for (ThreadCheck thread : threads) {
+                blackListOcurrences.addAll(thread.getIndexes());
+                ocurrencesCount.addAndGet(thread.getOccurrences());
+                checkedListsCount += thread.getServersChecked();
+            }
 
-
-        for(ThreadCheck thread:threads){
-            blackListOcurrences.addAll(thread.getIndexes());
-            ocurrencesCount.addAndGet(thread.getOccurrences());
-            checkedListsCount += thread.getServersChecked();
+            if (ocurrencesCount.get() >= BLACK_LIST_ALARM_COUNT) {
+                endThreads(threads);
+                skds.reportAsNotTrustworthy(ipaddress);
+            } else {
+                this.resumeThreads(threads);
+                skds.reportAsTrustworthy(ipaddress);
+            }
         }
-        
-        if (ocurrencesCount.get()>=BLACK_LIST_ALARM_COUNT){
-            endThreads(threads);
-            skds.reportAsNotTrustworthy(ipaddress);
-        }
-        else{
-            skds.reportAsTrustworthy(ipaddress);
-        }                
         
         LOG.log(Level.INFO, "Checked Black Lists:{0} of {1}", new Object[]{checkedListsCount, skds.getRegisteredServersCount()});
         
         return blackListOcurrences;
     }
 
+    public void pauseThreads(ArrayList<ThreadCheck> threads){
+        for (ThreadCheck thread : threads){
+            thread.pauseThread();
+        }
+        running = false;
+    }
+
+    public void  resumeThreads(ArrayList<ThreadCheck> threads){
+        for (ThreadCheck thread : threads){
+            thread.resumeThread();
+        }
+        running = true;
+        synchronized (lock){
+            lock.notifyAll();
+        }
+    }
     public void endThreads(ArrayList<ThreadCheck> threads){
         for (ThreadCheck thread: threads){
             thread.endThread();
         }
+        running = false;
     }
     
     private static final Logger LOG = Logger.getLogger(HostBlackListsValidator.class.getName());
