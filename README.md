@@ -1,6 +1,9 @@
 
 ## Escuela Colombiana de Ingeniería
 ### Arquitecturas de Software – ARSW
+#### AUTORES:
+- [Saray Alieth Mendivelso](https://github.com/saraygonm)
+- [Milton Andres Gutierrez](https://github.com/MiltonGutierrez)
 
 
 #### Ejercicio – programación concurrente, condiciones de carrera y sincronización de hilos. EJERCICIO INDIVIDUAL O EN PAREJAS.
@@ -10,7 +13,41 @@
 Control de hilos con wait/notify. Productor/consumidor.
 
 1. Revise el funcionamiento del programa y ejecútelo. Mientras esto ocurren, ejecute jVisualVM y revise el consumo de CPU del proceso correspondiente. A qué se debe este consumo?, cual es la clase responsable?
+
+##### Consumo del CPU cuando inicia el programa:
+- El consumo  de CPU es relativamente bajo, alrededor del 9.7%. Desde una perspectiva general ésto puede deberse a varis razones como la naturaleza de la tarea que está ejecutando el programa, el estado de los hilos de ejecución o la eficiencia del código.
+
+<p align="center">
+<img src="img/prodcons/consumoCPU1.png" alt="Hilo CountThread" width="700px">
+</p>
+
+##### Consumo del CPU cuando finaliza el programa:
+
+- El consumo de CPU sigue siendo constante, alrededor del 9.4%.
+<p align="center">
+<img src="img/prodcons/finalConsumoCPU1.png" alt="Hilo CountThread" width="700px">
+</p>
+
+##### Salida en consola:
+
+<p align="center">
+<img src="img/prodcons/salidaterminalCPU1.png" alt="Hilo CountThread" width="700px">
+</p>
+
+##### ¿A qué se debe este consumo?:
+
+- Este consumo se debe a que en la clase `Consumer`; el método `run` contiene un bucle `while` que se ejecuta continuamente, incluso cuando la lista está vacía. Esta espera activa causa un aumento innecesario en el consumo de CPU,  afectando negativamente el rendimiento del programa.
+
+<p align="center">
+<img src="img/prodcons/clase.png" alt="Hilo CountThread" width="700px">
+</p>
+
 2. Haga los ajustes necesarios para que la solución use más eficientemente la CPU, teniendo en cuenta que -por ahora- la producción es lenta y el consumo es rápido. Verifique con JVisualVM que el consumo de CPU se reduzca.
+
+<p align="center">
+<img src="img/prodcons/CPUimplementacionMejorada..png" alt="Hilo CountThread" width="700px">
+</p>
+
 3. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.
 
 
@@ -27,6 +64,7 @@ Sincronización y Dead-Locks.
 
 ![](http://files.explosm.net/comics/Matt/Bummed-forever.png)
 
+# clonar el balcklist en un repo aparte pero NOOOOOO editar el que subimos al lab 1 o si no nos bajan :/
 1. Revise el programa “highlander-simulator”, dispuesto en el paquete edu.eci.arsw.highlandersim. Este es un juego en el que:
 
 	* Se tienen N jugadores inmortales.
