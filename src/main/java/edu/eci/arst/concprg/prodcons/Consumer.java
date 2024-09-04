@@ -41,7 +41,7 @@ public class Consumer extends Thread {
             while (true) {
                 synchronized (queue) {
                     // si la Cola esta vacia, el consumidor debe esperar con wait()
-                    while(queue.isEmpty()) { // usar mejor un if (para corregir en casa :\)
+                    if(queue.isEmpty()) { 
                         try {
                             //System.out.println("Consumer waiting...");
                             queue.wait();
@@ -49,13 +49,14 @@ public class Consumer extends Thread {
                             Thread.currentThread().interrupt();
                         }
                     }
+                    else{
+                        //en caso de que hayan elementos en la cola debe consumir 1
+                        int elem = queue.poll();
+                        System.out.println("Consumer consumes " + elem);
+                        // Después de consumir, notifica al productor en caso de que esté esperando
+                        queue.notifyAll();
+                    }
 
-                    //en caso de que hayan elementos en la cola debe consumir 1
-
-                    int elem = queue.poll();
-                    System.out.println("Consumer consumes " + elem);
-                    // Después de consumir, notifica al productor en caso de que esté esperando
-                    queue.notifyAll();
                 }
             }
         }
