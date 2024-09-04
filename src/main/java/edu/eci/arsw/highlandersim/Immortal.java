@@ -17,6 +17,7 @@ public class Immortal extends Thread {
 
     private final Random r = new Random(System.currentTimeMillis());
 
+    private Boolean fighting;
 
     public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb) {
         super(name);
@@ -25,38 +26,50 @@ public class Immortal extends Thread {
         this.immortalsPopulation = immortalsPopulation;
         this.health = health;
         this.defaultDamageValue=defaultDamageValue;
+        this.fighting = true;
     }
 
     public void run() {
 
         while (true) {
-            Immortal im;
+            if(fighting){
+                Immortal im;
 
-            int myIndex = immortalsPopulation.indexOf(this);
+                int myIndex = immortalsPopulation.indexOf(this);
 
-            int nextFighterIndex = r.nextInt(immortalsPopulation.size());
+                int nextFighterIndex = r.nextInt(immortalsPopulation.size());
 
-            //avoid self-fight
-            if (nextFighterIndex == myIndex) {
-                nextFighterIndex = ((nextFighterIndex + 1) % immortalsPopulation.size());
+                //avoid self-fight
+                if (nextFighterIndex == myIndex) {
+                    nextFighterIndex = ((nextFighterIndex + 1) % immortalsPopulation.size());
+                }
+
+                //Condicion de carrera
+                im = immortalsPopulation.get(nextFighterIndex);
+
+                this.fight(im);
+
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-
-            im = immortalsPopulation.get(nextFighterIndex);
-
-            this.fight(im);
-
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            else{
+                synchronized(immortalsPopulation){
+                    try {
+                        immortalsPopulation.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-
         }
 
     }
 
     public void fight(Immortal i2) {
-
+        //Conidición de carrera, otro immortal puede estar intentadp acceder a los metodos get y changeHealth al mismo tiempo.
         if (i2.getHealth() > 0) {
             i2.changeHealth(i2.getHealth() - defaultDamageValue);
             this.health += defaultDamageValue;
@@ -67,10 +80,12 @@ public class Immortal extends Thread {
 
     }
 
+    //Metodo  con condicion de carrera
     public void changeHealth(int v) {
         health = v;
     }
 
+    //Metodo  con condicion de carrera
     public int getHealth() {
         return health;
     }
@@ -79,6 +94,17 @@ public class Immortal extends Thread {
     public String toString() {
 
         return name + "[" + health + "]";
+    }
+
+    public void stopImmortal(){
+        this.fighting = false;
+    }
+
+    public void resumeImmortal(){
+        this.fighting = true;
+        synchronized(immortalsPopulation){
+            immortalsPopulation.notifyAll();
+        }
     }
 
 }

@@ -102,7 +102,6 @@ Sincronización y Dead-Locks.
 
 ![](http://files.explosm.net/comics/Matt/Bummed-forever.png)
 
-# clonar el balcklist en un repo aparte pero NOOOOOO editar el que subimos al lab 1 o si no nos bajan :/
 1. Revise el programa “highlander-simulator”, dispuesto en el paquete edu.eci.arsw.highlandersim. Este es un juego en el que:
 
 	* Se tienen N jugadores inmortales.
@@ -137,7 +136,42 @@ La opción *pause and check* retorna la cantidad de inmortales junto a su vida, 
 
 4. Una primera hipótesis para que se presente la condición de carrera para dicha función (pause and check), es que el programa consulta la lista cuyos valores va a imprimir, a la vez que otros hilos modifican sus valores. Para corregir esto, haga lo que sea necesario para que efectivamente, antes de imprimir los resultados actuales, se pausen todos los demás hilos. Adicionalmente, implemente la opción ‘resume’.
 
+Para poder hacer esto, en el método *run()* de cada uno de la clase *Immortal*, se valida la variable booleana *fighting* para que si esta es true, se ejecute normal, sino con el uso de la lista como objeto lock, se ponga a esperar el *Immortal* esto con la finalidad de poder pausar y continuar su ejecución con los métodos *stopImmorta()* y *resumeImmortal()*.
+
+**run()**
+
+<p align="center">
+<img src="img/prodcons/parte3/3.4.2.png" alt="run" width="700px">
+</p>
+
+**Funcionalidad bóton pause and check**
+
+<p align="center">
+<img src="img/prodcons/parte3/3.4.1.png" alt="pause" width="700px">
+</p>
+
+**Funcionalidad bóton resume**
+
+<p align="center">
+<img src="img/prodcons/parte3/3.4.3.png" alt="Vida inmortales" width="700px">
+</p>
+
+
 5. Verifique nuevamente el funcionamiento (haga clic muchas veces en el botón). Se cumple o no el invariante?.
+
+Al pausar y resumir constantemete, notamos que el invariante seguía sin cumplirse.
+
+<p align="center">
+<img src="img/prodcons/parte3/3.5.1.png" alt="!invariante1" width="700px">
+</p>
+
+<p align="center">
+<img src="img/prodcons/parte3/3.5.2.png" alt="!invariante2" width="700px">
+</p>
+
+<p align="center">
+<img src="img/prodcons/parte3/3.5.3.png" alt="!invariante3" width="700px">
+</p>
 
 6. Identifique posibles regiones críticas en lo que respecta a la pelea de los inmortales. Implemente una estrategia de bloqueo que evite las condiciones de carrera. Recuerde que si usted requiere usar dos o más ‘locks’ simultáneamente, puede usar bloques sincronizados anidados:
 
