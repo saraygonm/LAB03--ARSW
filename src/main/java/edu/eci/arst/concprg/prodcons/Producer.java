@@ -22,7 +22,7 @@ public class Producer extends Thread {
     private Random rand=null;
     private final long stockLimit;
 
-    public Producer(Queue<Integer> queue,long stockLimit) {
+    public Producer(Queue<Integer> queue, long stockLimit) {
         this.queue = queue;
         rand = new Random(System.currentTimeMillis());
         this.stockLimit=stockLimit;
@@ -31,18 +31,21 @@ public class Producer extends Thread {
     @Override
     public void run() {
         while (true) {
-
             dataSeed = dataSeed + rand.nextInt(100);
-            System.out.println("Producer added " + dataSeed);
-            // modificacin para que despues de añadir notifique para que empiecen a consumir
             synchronized (queue) {
-                queue.add(dataSeed);
+                //Se verifica que se puedan añadir elementos a la cola que respeten el limite.
+                if(queue.size() < stockLimit){
+                    queue.add(dataSeed);
+                    System.out.println("Producer added " + dataSeed);
+                }
+                else{
+                    System.out.println("Can't produce: sotckLimit reached");
+                }
                 queue.notifyAll();
-
                 try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Producer.class.getName()).log(Level.SEVERE, null, ex);
+                    Thread.sleep(250);
+                } catch (Exception e) {
+                    // TODO: handle exception
                 }
             }
         }

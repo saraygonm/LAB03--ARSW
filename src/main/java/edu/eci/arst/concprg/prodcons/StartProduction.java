@@ -20,10 +20,12 @@ public class StartProduction {
     
     public static void main(String[] args) {
         
-        Queue<Integer> queue=new LinkedBlockingQueue<>();
+        //Para poder darle un limite de creación simplemente le damos como parametro la capacidad necesitada 
+        int queueLimit = 10;
+        Queue<Integer> queue= new LinkedBlockingQueue<>(queueLimit);
         
         
-        new Producer(queue,Long.MAX_VALUE).start();
+        new Producer(queue, queueLimit).start();
         
         //let the producer create products for 5 seconds (stock).
         try {

@@ -6,6 +6,8 @@
 package edu.eci.arst.concprg.prodcons;
 
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -38,29 +40,32 @@ public class Consumer extends Thread {
     }
     */
     public void run() {
-            while (true) {
-                synchronized (queue) {
-                    // si la Cola esta vacia, el consumidor debe esperar con wait()
-                    if(queue.isEmpty()) { 
-                        try {
-                            //System.out.println("Consumer waiting...");
-                            queue.wait();
-                        }catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
+        while (true) {
+            synchronized (queue) {
+                // si la Cola esta vacia, el consumidor debe esperar con wait()
+                if(queue.isEmpty()) { 
+                    try {
+                        System.out.println("Consumer waiting...");
+                        queue.wait();
+                    }catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     }
-                    else{
-                        //en caso de que hayan elementos en la cola debe consumir 1
-                        int elem = queue.poll();
-                        System.out.println("Consumer consumes " + elem);
-                        // Después de consumir, notifica al productor en caso de que esté esperando
-                        queue.notifyAll();
-                    }
-
+                }
+                int elem = queue.poll();
+                System.out.println("Consumer consumes " + elem);
+                // Después de consumir, notifica al productor en caso de que esté esperando
+                queue.notifyAll();
+                
+                //Se pone a esperar al Consumidor de modo que este consuma lento
+                try {
+                   Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();            
                 }
             }
         }
-    }
+    }             
+}
 
 
 
