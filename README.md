@@ -18,20 +18,20 @@ Control de hilos con wait/notify. Productor/consumidor.
 - El consumo  de CPU es relativamente bajo, alrededor del 9.7%. Desde una perspectiva general ésto puede deberse a varis razones como la naturaleza de la tarea que está ejecutando el programa, el estado de los hilos de ejecución o la eficiencia del código.
 
 <p align="center">
-<img src="img/prodcons/consumoCPU1.png" alt="Hilo CountThread" width="700px">
+<img src="img/prodcons/parte1/consumoCPU1.png" alt="Hilo CountThread" width="700px">
 </p>
 
 ##### Consumo del CPU cuando finaliza el programa:
 
 - El consumo de CPU sigue siendo constante, alrededor del 9.4%.
 <p align="center">
-<img src="img/prodcons/finalConsumoCPU1.png" alt="Hilo CountThread" width="700px">
+<img src="img/prodcons/parte1/finalConsumoCPU1.png" alt="Hilo CountThread" width="700px">
 </p>
 
 ##### Salida en consola:
 
 <p align="center">
-<img src="img/prodcons/salidaterminalCPU1.png" alt="Hilo CountThread" width="700px">
+<img src="img/prodcons/parte1/salidaterminalCPU1.png" alt="Hilo CountThread" width="700px">
 </p>
 
 ##### ¿A qué se debe este consumo?:
@@ -39,13 +39,24 @@ Control de hilos con wait/notify. Productor/consumidor.
 - Este consumo se debe a que en la clase `Consumer`; el método `run` contiene un bucle `while` que se ejecuta continuamente, incluso cuando la lista está vacía. Esta espera activa causa un aumento innecesario en el consumo de CPU,  afectando negativamente el rendimiento del programa.
 
 <p align="center">
-<img src="img/prodcons/clase.png" alt="Hilo CountThread" width="700px">
+<img src="img/prodcons/parte1/clase.png" alt="clase" width="700px">
 </p>
 
 2. Haga los ajustes necesarios para que la solución use más eficientemente la CPU, teniendo en cuenta que -por ahora- la producción es lenta y el consumo es rápido. Verifique con JVisualVM que el consumo de CPU se reduzca.
 
+Para poder corregur lo mencionado anteriormente, simplemente se sincroniza la parte del codigo quel consumer utilizando como objeto la cola, de modo que si esta vacia, se pide que el Thread que la este usando espere (en este caso seria el mismo Thread de **consumer**) esto para que se espere al que  *producer*, siga llenando la cola.
 <p align="center">
-<img src="img/prodcons/CPUimplementacionMejorada..png" alt="Hilo CountThread" width="700px">
+<img src="img/prodcons/parte1/solucion1.png" alt="sol1" width="700px">
+</p>
+
+En el caso de la ejecución del *Producer* podemos observar como se permite que este añada elementos a la cola, y despues de esto notifica a todos los Threads esperando para que puedan acceder a la cola.
+<p align="center">
+<img src="img/prodcons/parte1/solucion2.png" alt="sol2" width="700px">
+</p>
+
+Con estas modificaciones podemos observar el cambio en el uso del CPU:
+<p align="center">
+<img src="img/prodcons/parte1/CPUimplementacionMejorada.png" alt="CPUIMEJOR" width="700px">
 </p>
 
 3. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.
