@@ -81,7 +81,7 @@ Teniendo en cuenta los conceptos vistos de condición de carrera y sincronizaci�
 Para poder realizar esto, una solución bastante simple y eficiente, fue añadir un AtomicInteger que nos sirve como contador de las veces que se encuentra la lista como negra, de manera que se este objeto se comparta con cada uno de los *BlackListThreads* y simplemente se estableza la condición en el for que si este objeto llega a obtener un valor igual a 5 se termine la ejecución de cada uno de los Threads.
 
 <p align="center">
-<img src="img/prodcons/parte2/atomicInteger1.png" alt="CPUIMEJOR" width="700px">
+<img src="img/prodcons/parte2/atomicInteger.png" alt="CPUIMEJOR" width="700px">
 </p>
 
 Aquí se muestra el cambio en el metodo *run()* de la clase BlackListThreads:
