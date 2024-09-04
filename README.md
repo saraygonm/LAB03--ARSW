@@ -69,6 +69,18 @@ Teniendo en cuenta los conceptos vistos de condición de carrera y sincronizaci�
 - La búsqueda distribuida se detenga (deje de buscar en las listas negras restantes) y retorne la respuesta apenas, en su conjunto, los hilos hayan detectado el número de ocurrencias requerido que determina si un host es confiable o no (_BLACK_LIST_ALARM_COUNT_).
 - Lo anterior, garantizando que no se den condiciones de carrera.
 
+Para poder realizar esto, una solución bastante simple y eficiente, fue añadir un AtomicInteger que nos sirve como contador de las veces que se encuentra la lista como negra, de manera que se este objeto se comparta con cada uno de los *BlackListThreads* y simplemente se estableza la condición en el for que si este objeto llega a obtener un valor igual a 5 se termine la ejecución de cada uno de los Threads.
+
+<p align="center">
+<img src="img/prodcons/parte2/atomicInteger1.png" alt="CPUIMEJOR" width="700px">
+</p>
+
+Aquí se muestra el cambio en el metodo *run()* de la clase BlackListThreads:
+
+<p align="center">
+<img src="img/prodcons/parte2/atomicInteger2.png" alt="CPUIMEJOR" width="700px">
+</p>
+
 ##### Parte III. – Avance para el martes, antes de clase.
 
 Sincronización y Dead-Locks.
