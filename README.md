@@ -61,6 +61,15 @@ Con estas modificaciones podemos observar el cambio en el uso del CPU:
 
 3. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.
 
+Usando la colección LinkedBlockingQueue, se permitia establecer un limite al que está podía llegar, simplemente pasandole este como parametro al momento de instanciarla. Además se puso unos limites de tiempo en los que tanto el productor podia producir y el consumidor consumir.
+
+<p align="center">
+<img src="img/prodcons/parte1/solucion1.3.1.png" alt="CPUIMEJOR" width="700px">
+</p>
+
+<p align="center">
+<img src="img/prodcons/parte1/solucion1.3.2.png" alt="CPUIMEJOR" width="700px">
+</p>
 
 ##### Parte II. – Antes de terminar la clase.
 
