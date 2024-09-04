@@ -81,6 +81,12 @@ Aquí se muestra el cambio en el metodo *run()* de la clase BlackListThreads:
 <img src="img/prodcons/parte2/atomicInteger2.png" alt="CPUIMEJOR" width="700px">
 </p>
 
+Aquí se muestra los resultados (como no se verifican todas las listas existentes):
+
+<p align="center">
+<img src="img/prodcons/parte2/atomicInteger3.png" alt="CPUIMEJOR" width="700px">
+</p>
+
 ##### Parte III. – Avance para el martes, antes de clase.
 
 Sincronización y Dead-Locks.
