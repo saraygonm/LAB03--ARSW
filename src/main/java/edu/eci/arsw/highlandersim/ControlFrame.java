@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import java.awt.Color;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JScrollBar;
 
 public class ControlFrame extends JFrame {
@@ -89,7 +90,7 @@ public class ControlFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 int sum = 0;
                 for (Immortal im : immortals) {
-                    im.stopImmortal();
+                    im.pause();
                 }
 
                 for(Immortal im : immortals){
@@ -107,11 +108,13 @@ public class ControlFrame extends JFrame {
         btnResume.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 
-                for(Immortal im: immortals){
-                    if(im.isAlive()){
-                        im.resumeImmortal();
-                    }
+                for(Immortal im: immortals) {
+                    im.keepFighting();
                 }
+                synchronized (immortals) {
+                    immortals.notifyAll();
+                }
+
             }
         });
 
@@ -127,6 +130,12 @@ public class ControlFrame extends JFrame {
 
         JButton btnStop = new JButton("STOP");
         btnStop.setForeground(Color.RED);
+        btnStop.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e) {
+                immortals.clear();
+                btnStart.setEnabled(true);
+            }
+        });
         toolBar.add(btnStop);
 
         scrollPane = new JScrollPane();
@@ -142,14 +151,14 @@ public class ControlFrame extends JFrame {
 
     }
 
-    public List<Immortal> setupInmortals() {
+    public CopyOnWriteArrayList<Immortal> setupInmortals() {
 
         ImmortalUpdateReportCallback ucb=new TextAreaUpdateReportCallback(output,scrollPane);
         
         try {
             int ni = Integer.parseInt(numOfImmortals.getText());
 
-            List<Immortal> il = new LinkedList<Immortal>();
+            CopyOnWriteArrayList<Immortal> il = new CopyOnWriteArrayList<Immortal>();
 
             for (int i = 0; i < ni; i++) {
                 Immortal i1 = new Immortal("im" + i, il, DEFAULT_IMMORTAL_HEALTH, DEFAULT_DAMAGE_VALUE,ucb);

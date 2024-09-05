@@ -102,14 +102,14 @@ Sincronización y Dead-Locks.
 
 ![](http://files.explosm.net/comics/Matt/Bummed-forever.png)
 
-1. Revise el programa “highlander-simulator”, dispuesto en el paquete edu.eci.arsw.highlandersim. Este es un juego en el que:
+#### 1. Revise el programa “highlander-simulator”, dispuesto en el paquete edu.eci.arsw.highlandersim. Este es un juego en el que:
 
 	* Se tienen N jugadores inmortales.
 	* Cada jugador conoce a los N-1 jugador restantes.
 	* Cada jugador, permanentemente, ataca a algún otro inmortal. El que primero ataca le resta M puntos de vida a su contrincante, y aumenta en esta misma cantidad sus propios puntos de vida.
 	* El juego podría nunca tener un único ganador. Lo más probable es que al final sólo queden dos, peleando indefinidamente quitando y sumando puntos de vida.
 
-2. Revise el código e identifique cómo se implemento la funcionalidad antes indicada. Dada la intención del juego, un invariante debería ser que la sumatoria de los puntos de vida de todos los jugadores siempre sea el mismo(claro está, en un instante de tiempo en el que no esté en proceso una operación de incremento/reducción de tiempo). Para este caso, para N jugadores, cual debería ser este valor?.
+#### 2. Revise el código e identifique cómo se implemento la funcionalidad antes indicada. Dada la intención del juego, un invariante debería ser que la sumatoria de los puntos de vida de todos los jugadores siempre sea el mismo(claro está, en un instante de tiempo en el que no esté en proceso una operación de incremento/reducción de tiempo). Para este caso, para N jugadores, cual debería ser este valor?.
 
 Teniendo en cuenta el valor estandar de vida DEFAULT_IMMORTAL_HEALTH, el valor de la sumatoria de los puntos de vida de todos los jugadores debería de ser de 100*N, en la implementación notamos que instancian un total de 3 inmortales, por lo que sumatoria en teoria deberia de ser de 300 puntos.
 
@@ -121,7 +121,7 @@ Teniendo en cuenta el valor estandar de vida DEFAULT_IMMORTAL_HEALTH, el valor d
 <img src="img/prodcons/parte3/3.2.2.png" alt="Vida inmortales" width="700px">
 </p>
 
-3. Ejecute la aplicación y verifique cómo funcionan las opción ‘pause and check’. Se cumple el invariante?.
+#### 3. Ejecute la aplicación y verifique cómo funcionan las opción ‘pause and check’. Se cumple el invariante?.
 
 La opción *pause and check* retorna la cantidad de inmortales junto a su vida, además de la sumatoria de la vida de todos los inmortales (esto sin parar la ejecución de los inmortales). Al utilizar varias veces esta opción, notamos que el invariante no se cumple, es más hasta se encuentra que en cada momento hay una sumatoria con un valor diferente como se muestra en las capturas:
 
@@ -134,7 +134,7 @@ La opción *pause and check* retorna la cantidad de inmortales junto a su vida, 
 </p>
 
 
-4. Una primera hipótesis para que se presente la condición de carrera para dicha función (pause and check), es que el programa consulta la lista cuyos valores va a imprimir, a la vez que otros hilos modifican sus valores. Para corregir esto, haga lo que sea necesario para que efectivamente, antes de imprimir los resultados actuales, se pausen todos los demás hilos. Adicionalmente, implemente la opción ‘resume’.
+#### 4. Una primera hipótesis para que se presente la condición de carrera para dicha función (pause and check), es que el programa consulta la lista cuyos valores va a imprimir, a la vez que otros hilos modifican sus valores. Para corregir esto, haga lo que sea necesario para que efectivamente, antes de imprimir los resultados actuales, se pausen todos los demás hilos. Adicionalmente, implemente la opción ‘resume’.
 
 Para poder hacer esto, en el método *run()* de cada uno de la clase *Immortal*, se valida la variable booleana *fighting* para que si esta es true, se ejecute normal, sino con el uso de la lista como objeto lock, se ponga a esperar el *Immortal* esto con la finalidad de poder pausar y continuar su ejecución con los métodos *stopImmorta()* y *resumeImmortal()*.
 
@@ -157,7 +157,7 @@ Para poder hacer esto, en el método *run()* de cada uno de la clase *Immortal*,
 </p>
 
 
-5. Verifique nuevamente el funcionamiento (haga clic muchas veces en el botón). Se cumple o no el invariante?.
+#### 5. Verifique nuevamente el funcionamiento (haga clic muchas veces en el botón). Se cumple o no el invariante?.
 
 Al pausar y resumir constantemete, notamos que el invariante seguía sin cumplirse.
 
@@ -173,7 +173,7 @@ Al pausar y resumir constantemete, notamos que el invariante seguía sin cumplir
 <img src="img/prodcons/parte3/3.5.3.png" alt="!invariante3" width="700px">
 </p>
 
-6. Identifique posibles regiones críticas en lo que respecta a la pelea de los inmortales. Implemente una estrategia de bloqueo que evite las condiciones de carrera. Recuerde que si usted requiere usar dos o más ‘locks’ simultáneamente, puede usar bloques sincronizados anidados:
+#### 6. Identifique posibles regiones críticas en lo que respecta a la pelea de los inmortales. Implemente una estrategia de bloqueo que evite las condiciones de carrera. Recuerde que si usted requiere usar dos o más ‘locks’ simultáneamente, puede usar bloques sincronizados anidados:
 
 	Notamos varios puntos con condiciones de carrera, especialmente donde se accede tanto a la lista de inmortales, como en cuando se acceden a los métodos de * y *changeHealt()* así que como se muestra en las diapositivas, utilizamos los bloques de sincronización con locks diferentes según lo necesitado.
 
@@ -187,24 +187,76 @@ Al pausar y resumir constantemete, notamos que el invariante seguía sin cumplir
 <img src="img/prodcons/parte3/3.6.1.png" alt="race2" width="700px">
 </p>
 
-7. Tras implementar su estrategia, ponga a correr su programa, y ponga atención a si éste se llega a detener. Si es así, use los programas jps y jstack para identificar por qué el programa se detuvo.
+#### 7. Tras implementar su estrategia, ponga a correr su programa, y ponga atención a si éste se llega a detener. Si es así, use los programas jps y jstack para identificar por qué el programa se detuvo.
 
 La estrategia no funcionó por lo que se empezo a corregirla, notamos que se debia organizar la forma en la que se accedia al objeto mediante el uso de el codigo has de cada uno de los Immortales, de modo que las implementaciones quedaron de la siguiente manera:
 
 <p align="center">
-<img src="img/prodcons/parte3/3.6.3.png" alt="race3" width="700px">
+<img src="img/prodcons/parte3/3.7.3.png" alt="race3" width="700px">
 </p>
 
 
-8. Plantee una estrategia para corregir el problema antes identificado (puede revisar de nuevo las páginas 206 y 207 de _Java Concurrency in Practice_).
+#### 8. Plantee una estrategia para corregir el problema antes identificado (puede revisar de nuevo las páginas 206 y 207 de _Java Concurrency in Practice_).
 
-9. Una vez corregido el problema, rectifique que el programa siga funcionando de manera consistente cuando se ejecutan 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante, debe analizar lo realizado en el paso 4.
+El método previene condiciones de carrera al sincronizar los accesos a las variables de salud y, mediante un sistema de bloqueos, evita que ambos inmortales queden atrapados en espera mutua, de la siguiente manera:
 
-10. Un elemento molesto para la simulación es que en cierto punto de la misma hay pocos 'inmortales' vivos realizando peleas fallidas con 'inmortales' ya muertos. Es necesario ir suprimiendo los inmortales muertos de la simulación a medida que van muriendo. Para esto:
-	* Analizando el esquema de funcionamiento de la simulación, esto podría crear una condición de carrera? Implemente la funcionalidad, ejecute la simulación y observe qué problema se presenta cuando hay muchos 'inmortales' en la misma. Escriba sus conclusiones al respecto en el archivo RESPUESTAS.txt.
-	* Corrija el problema anterior __SIN hacer uso de sincronización__, pues volver secuencial el acceso a la lista compartida de inmortales haría extremadamente lenta la simulación.
+- Este código define un método `fight` para la clase `Immortal`, simulando una pelea entre dos objetos de ese tipo. Utiliza bloqueos (`lock1` y `lock2`) para evitar condiciones de carrera y asegura que solo un hilo pueda modificar la salud de los inmortales a la vez. Durante la pelea:
 
-11. Para finalizar, implemente la opción STOP.
+- Si ambos tienen salud, el inmortal atacante reduce la salud del oponente (`i2`) y se la suma a la suya.
+- Si el oponente ya está muerto, se registra un mensaje.
+
+<p align="center">
+<img src="img/prodcons/parte3/3.8.1.png" alt="race3" width="700px">
+</p>
+
+
+#### 9. Una vez corregido el problema, rectifique que el programa siga funcionando de manera consistente cuando se ejecutan 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante, debe analizar lo realizado en el paso 4.
+En todos los casos,  se mantiene correctamente el invariante. 
+
+Los distintos botones funcionan adecuadamente, y al pausar, se pueden observar los inmortales 
+que siguen vivos y sus respectivas vidas.
+
+#### 100
+<p align="center">
+<img src="img/prodcons/parte3/3.9.png" alt="race3" width="700px">
+</p>
+
+#### 1000
+<p align="center">
+<img src="img/prodcons/parte3/3.9.2.png" alt="race3" width="700px">
+</p>
+
+#### 10000
+<p align="center">
+<img src="img/prodcons/parte3/3.9.3.png" alt="race3" width="700px">
+</p>
+
+#### 10. Un elemento molesto para la simulación es que en cierto punto de la misma hay pocos 'inmortales' vivos realizando peleas fallidas con 'inmortales' ya muertos. Es necesario ir suprimiendo los inmortales muertos de la simulación a medida que van muriendo. Para esto:
+- Analizando el esquema de funcionamiento de la simulación, esto podría crear una condición de carrera? Implemente la funcionalidad, ejecute la simulación y observe qué problema se presenta cuando hay muchos 'inmortales' en la misma. Escriba sus conclusiones al respecto en el archivo RESPUESTAS.txt.
+- corrija el problema anterior __SIN hacer uso de sincronización__, pues volver secuencial el acceso a la lista compartida de inmortales haría extremadamente lenta la simulación.
+
+
+Se usa `CopyOnWriteArrayList` porque permite manejar la lista de inmortales de manera segura en un entorno multihilo, asegurando que las modificaciones y accesos a la lista no causen problemas de concurrencia sin necesidad de usar bloqueos explícitos, lo que simplifica el manejo de hilos.
+
+<p align="center">
+<img src="img/prodcons/parte3/3.10.png" alt="race3" width="700px">
+</p>
+
+#### 11. Para finalizar, implemente la opción STOP.
+	
+Este código crea un botón `STOP` en una interfaz gráfica utilizando `JButton` y realiza las siguientes acciones:
+
+- **Creación del botón**: Se crea un botón llamado `btnStop` con el texto "STOP" y color de texto rojo (`Color.RED`).
+
+- **Añadir un `ActionListener`**: Se asocia un `ActionListener` al botón que define lo que sucede cuando se hace clic en él. En este caso:
+	- Se vacía la lista `immortals` (suponiendo que almacena objetos relacionados con la pelea).
+	- Se habilita otro botón (`btnStart`), permitiendo que sea interactivo de nuevo.
+
+- **Agregar el botón a la barra de herramientas**: Finalmente, el botón `STOP` se agrega a la barra de herramientas (`toolBar`).
+
+<p align="center">
+<img src="img/prodcons/parte3/3.11.png" alt="race3" width="700px">
+</p>
 
 <!--
 ### Criterios de evaluación

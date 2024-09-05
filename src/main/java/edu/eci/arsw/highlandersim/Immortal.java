@@ -13,11 +13,14 @@ public class Immortal extends Thread {
 
     private final List<Immortal> immortalsPopulation;
 
+    private boolean Pause;
     private final String name;
+    private final Object block;
+
 
     private final Random r = new Random(System.currentTimeMillis());
 
-    private Boolean fighting;
+    private Boolean isDeath;
 
 
     public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb) {
@@ -27,45 +30,49 @@ public class Immortal extends Thread {
         this.immortalsPopulation = immortalsPopulation;
         this.health = health;
         this.defaultDamageValue=defaultDamageValue;
-        this.fighting = true;
+        this.block = new Object();
     }
 
     public void run() {
-        while (getHealth() > 0) {
-            if(fighting){
-                Immortal im;
-                int myIndex = immortalsPopulation.indexOf(this);
-                int nextFighterIndex = r.nextInt(immortalsPopulation.size());
+        while (immortalsPopulation.size() > 1 && this.getHealth() > 0) {
+            synchronized (block) {
+                while (Pause) {
 
-                //avoid self-fight, in a future it could add a race condition
-                if (nextFighterIndex == myIndex) {
-                    nextFighterIndex = ((nextFighterIndex + 1) % immortalsPopulation.size());
-                }
-
-
-                im = immortalsPopulation.get(nextFighterIndex);
-                
-                //Race conditions
-                this.fight(im);
-
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            else{
-                synchronized(immortalsPopulation){
                     try {
-                        immortalsPopulation.wait();
+                        block.wait();
+
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
             }
-        }
+            Immortal im;
+            int myIndex = immortalsPopulation.indexOf(this);
+            int nextFighterIndex = r.nextInt(immortalsPopulation.size());
 
+            //avoid self-fight, in a future it could add a race condition
+            if (nextFighterIndex == myIndex) {
+                nextFighterIndex = ((nextFighterIndex + 1) % immortalsPopulation.size());
+            }
+
+
+            im = immortalsPopulation.get(nextFighterIndex);
+
+            //Race conditions
+            this.fight(im);
+            if (im.getHealth() <= 0) {
+                immortalsPopulation.remove(im);
+                isDeath = true;
+            }
+
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
 
     public void fight(Immortal i2) {
         Immortal lock1 = ImmortalCode(i2);
@@ -73,8 +80,8 @@ public class Immortal extends Thread {
         synchronized(lock1){
             synchronized(lock2){
                 if(getHealth() > 0){
-                    if (i2.getHealth() > 0) { //getHealth and changeHealth has race conditions, we can address them with a syncronized block
-                        i2.changeHealth(i2.getHealth() - defaultDamageValue);
+                    if (i2.getHealth() > 0) { //getHealth and modificationHealth has race conditions, we can address them with a syncronized block
+                        i2.modificationHealth(i2.getHealth() - defaultDamageValue);
                         this.health += defaultDamageValue;
                         updateCallback.processReport("Fight: " + this + " vs " + i2+"\n");
                     }
@@ -87,10 +94,7 @@ public class Immortal extends Thread {
          }
     }
 
-    public void changeHealth(int v) {
-        health = v;  
-         
-    }
+
 
     public Immortal ImmortalCode(Immortal i2) {
         Immortal lockToUse;
@@ -106,28 +110,37 @@ public class Immortal extends Thread {
         return lockToUse;
     }
 
+    public void modificationHealth(int v) {
+        health = v;
+
+    }
     //Race conditions
     public int getHealth() {
-        synchronized(this){
-            return health; 
-        }   
+
+        return health;
+
+    }
+
+
+    public void pause() {
+        synchronized (block) {
+            Pause = true;
+        }
+
+    }
+    public void keepFighting(){
+        synchronized (block) {
+            Pause = false;
+            block.notifyAll();
+        }
     }
 
     @Override
     public String toString() {
-
         return name + "[" + health + "]";
     }
-
-    public void stopImmortal(){
-        this.fighting = false;
-    }
-
-    public void resumeImmortal(){
-        this.fighting = true;
-        synchronized(immortalsPopulation){
-            immortalsPopulation.notifyAll();
-        }
-    }
-
+    public void detenertodo(){
+        isDeath = true;}
 }
+
+
