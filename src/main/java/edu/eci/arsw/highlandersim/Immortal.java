@@ -31,7 +31,7 @@ public class Immortal extends Thread {
     }
 
     public void run() {
-        while (this.health < 300 && this.health > 0) {
+        while (getHealth() > 0) {
             if(fighting){
                 Immortal im;
                 int myIndex = immortalsPopulation.indexOf(this);
@@ -42,10 +42,8 @@ public class Immortal extends Thread {
                     nextFighterIndex = ((nextFighterIndex + 1) % immortalsPopulation.size());
                 }
 
-                //Race conditions in the access of possibly, the same immortal allocated in the list.
-                synchronized(immortalsPopulation){
-                    im = immortalsPopulation.get(nextFighterIndex);
-                }   
+
+                im = immortalsPopulation.get(nextFighterIndex);
                 
                 //Race conditions
                 this.fight(im);
@@ -70,24 +68,42 @@ public class Immortal extends Thread {
     }
 
     public void fight(Immortal i2) {
-        synchronized(i2){
-            if (i2.getHealth() > 0) { //getHealth and changeHealth has race conditions, we can address them with a syncronized block
-                i2.changeHealth(i2.getHealth() - defaultDamageValue);
-                this.health += defaultDamageValue;
-                updateCallback.processReport("Fight: " + this + " vs " + i2+"\n");
+        Immortal lock1 = ImmortalCode(i2);
+        Immortal lock2 = lock1 == this ? i2 : this;
+        synchronized(lock1){
+            synchronized(lock2){
+                if(getHealth() > 0){
+                    if (i2.getHealth() > 0) { //getHealth and changeHealth has race conditions, we can address them with a syncronized block
+                        i2.changeHealth(i2.getHealth() - defaultDamageValue);
+                        this.health += defaultDamageValue;
+                        updateCallback.processReport("Fight: " + this + " vs " + i2+"\n");
+                    }
+                    else {
+                        updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
+                    }
+                }
+                
             }
-            else {
-                updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
-            }
-        }
+         }
     }
 
-    //Race conditions
     public void changeHealth(int v) {
-        synchronized(this){
-            health = v;  
-        }
+        health = v;  
          
+    }
+
+    public Immortal ImmortalCode(Immortal i2) {
+        Immortal lockToUse;
+        int hash1 = System.identityHashCode(this);
+        int hash2 = System.identityHashCode(i2);
+        if (hash1 < hash2) {
+            lockToUse = this;
+        } else if (hash1 > hash2) {
+            lockToUse = i2;
+        } else {
+            lockToUse = this;
+        }
+        return lockToUse;
     }
 
     //Race conditions

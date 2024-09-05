@@ -189,6 +189,13 @@ Al pausar y resumir constantemete, notamos que el invariante seguía sin cumplir
 
 7. Tras implementar su estrategia, ponga a correr su programa, y ponga atención a si éste se llega a detener. Si es así, use los programas jps y jstack para identificar por qué el programa se detuvo.
 
+La estrategia no funcionó por lo que se empezo a corregirla, notamos que se debia organizar la forma en la que se accedia al objeto mediante el uso de el codigo has de cada uno de los Immortales, de modo que las implementaciones quedaron de la siguiente manera:
+
+<p align="center">
+<img src="img/prodcons/parte3/3.6.3.png" alt="race3" width="700px">
+</p>
+
+
 8. Plantee una estrategia para corregir el problema antes identificado (puede revisar de nuevo las páginas 206 y 207 de _Java Concurrency in Practice_).
 
 9. Una vez corregido el problema, rectifique que el programa siga funcionando de manera consistente cuando se ejecutan 100, 1000 o 10000 inmortales. Si en estos casos grandes se empieza a incumplir de nuevo el invariante, debe analizar lo realizado en el paso 4.
