@@ -175,13 +175,17 @@ Al pausar y resumir constantemete, notamos que el invariante seguía sin cumplir
 
 6. Identifique posibles regiones críticas en lo que respecta a la pelea de los inmortales. Implemente una estrategia de bloqueo que evite las condiciones de carrera. Recuerde que si usted requiere usar dos o más ‘locks’ simultáneamente, puede usar bloques sincronizados anidados:
 
-	```java
-	synchronized(locka){
-		synchronized(lockb){
-			…
-		}
-	}
-	```
+	Notamos varios puntos con condiciones de carrera, especialmente donde se accede tanto a la lista de inmortales, como en cuando se acceden a los métodos de * y *changeHealt()* así que como se muestra en las diapositivas, utilizamos los bloques de sincronización con locks diferentes según lo necesitado.
+
+**Método run()**
+<p align="center">
+<img src="img/prodcons/parte3/3.6.1.png" alt="race1" width="700px">
+</p>
+
+**Métodos fight() - changeHealth() - getHealth()**
+<p align="center">
+<img src="img/prodcons/parte3/3.6.1.png" alt="race2" width="700px">
+</p>
 
 7. Tras implementar su estrategia, ponga a correr su programa, y ponga atención a si éste se llega a detener. Si es así, use los programas jps y jstack para identificar por qué el programa se detuvo.
 

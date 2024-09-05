@@ -19,6 +19,7 @@ public class Immortal extends Thread {
 
     private Boolean fighting;
 
+
     public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb) {
         super(name);
         this.updateCallback=ucb;
@@ -30,23 +31,23 @@ public class Immortal extends Thread {
     }
 
     public void run() {
-
-        while (true) {
+        while (this.health < 300 && this.health > 0) {
             if(fighting){
                 Immortal im;
-
                 int myIndex = immortalsPopulation.indexOf(this);
-
                 int nextFighterIndex = r.nextInt(immortalsPopulation.size());
 
-                //avoid self-fight
+                //avoid self-fight, in a future it could add a race condition
                 if (nextFighterIndex == myIndex) {
                     nextFighterIndex = ((nextFighterIndex + 1) % immortalsPopulation.size());
                 }
 
-                //Condicion de carrera
-                im = immortalsPopulation.get(nextFighterIndex);
-
+                //Race conditions in the access of possibly, the same immortal allocated in the list.
+                synchronized(immortalsPopulation){
+                    im = immortalsPopulation.get(nextFighterIndex);
+                }   
+                
+                //Race conditions
                 this.fight(im);
 
                 try {
@@ -69,25 +70,31 @@ public class Immortal extends Thread {
     }
 
     public void fight(Immortal i2) {
-        //Conidición de carrera, otro immortal puede estar intentadp acceder a los metodos get y changeHealth al mismo tiempo.
-        if (i2.getHealth() > 0) {
-            i2.changeHealth(i2.getHealth() - defaultDamageValue);
-            this.health += defaultDamageValue;
-            updateCallback.processReport("Fight: " + this + " vs " + i2+"\n");
-        } else {
-            updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
+        synchronized(i2){
+            if (i2.getHealth() > 0) { //getHealth and changeHealth has race conditions, we can address them with a syncronized block
+                i2.changeHealth(i2.getHealth() - defaultDamageValue);
+                this.health += defaultDamageValue;
+                updateCallback.processReport("Fight: " + this + " vs " + i2+"\n");
+            }
+            else {
+                updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
+            }
         }
-
     }
 
-    //Metodo  con condicion de carrera
+    //Race conditions
     public void changeHealth(int v) {
-        health = v;
+        synchronized(this){
+            health = v;  
+        }
+         
     }
 
-    //Metodo  con condicion de carrera
+    //Race conditions
     public int getHealth() {
-        return health;
+        synchronized(this){
+            return health; 
+        }   
     }
 
     @Override
